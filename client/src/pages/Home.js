@@ -78,7 +78,7 @@ const Home = () => {
   };
 
   return (
-    <div style={{ background: "#40E0D0", padding: "20px", minHeight: "100vh" }}>
+    <div style={{ background: "#87CEFA", padding: "20px", minHeight: "100vh" }}>
       <h2 className="mb-4">Home Page</h2>
 
       <div className="mb-3">
