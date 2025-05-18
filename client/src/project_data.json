@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Web Development Portfolio",
+    "description": " Build a personal web development portfolio showcasing skills and projects.",
+    "solved": true
+  },
+  {
+    "id": 2,
+    "name": "E-commerce Website",
+    "description": "Develop an e-commerce platform for selling various products online.",
+    "solved": false
+  },
+  {
+    "id": 3,
+    "name": "Task Management App",
+    "description": "Build an application for managing tasks and to-do lists efficiently.",
+    "solved": true
+  },
+  {
+    "id": 4,
+    "name": "Social Media Dashboard",
+    "description": "Design a dashboard that aggregates and displays social media analytics.",
+    "solved": false
+  },
+  {
+    "id": 5,
+    "name": "Fitness Tracking App",
+    "description": "Develop a mobile app for tracking fitness activities and progress.",
+    "solved": true
+  }
+]

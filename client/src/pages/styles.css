@@ -1,0 +1,31 @@
+.login-btn{
+    border: none; 
+    background-color: #4b8989;
+    color: black;
+    width: 100%;
+    font-size: 1.2rem;
+}
+
+.login-title{
+    border-bottom: 3px solid rgb(10, 13, 13);
+}
+
+.login-container{
+    background-color: #56E0E0;
+}
+
+.sign-up-btn{
+    border: none; 
+    background-color: #4b8989;
+    color: black;
+    width: 100%;
+    font-size: 1.2rem;
+}
+
+.sign-up-title{
+    border-bottom: 3px solid rgb(10, 13, 13);
+}
+
+.sign-up-container{
+    background-color: #56E0E0;
+}

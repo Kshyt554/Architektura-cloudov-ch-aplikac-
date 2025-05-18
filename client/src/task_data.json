@@ -1,0 +1,167 @@
+[
+  {
+    "id": 1,
+    "projectId": 1,
+    "name": "Task 1 ",
+    "description": "Design the homepage layout.",
+    "completed": false,
+    "priority": "Should Have",
+    "state": "InProgress",
+    "time": "2 hours",
+    "tags": ["design", "layout"]
+  },
+  {
+    "id": 2,
+    "projectId": 1,
+    "name": "Task 2",
+    "description": "Implement responsive design for mobile devices.",
+    "completed": true,
+    "priority": "Must Have",
+    "state": "Solved",
+    "time": "1 hour",
+    "tags": ["responsive design", "mobile"]
+  },
+  {
+    "id": 3,
+    "projectId": 1,
+    "name": "Task 3",
+    "description": "Create a project section with detailed information.",
+    "completed": false,
+    "priority": "Could Have",
+    "state": "Waiting",
+    "time": "3 hours",
+    "tags": ["project", "section", "information"]
+  },
+  {
+    "id": 4,
+    "projectId": 2,
+    "name": "Task 1",
+    "description": "Design the product listing page.",
+    "completed": false,
+    "priority": "Must Have",
+    "state": "Waiting",
+    "time": "2 hours ",
+    "tags": ["design", "product", "listing"]
+  },
+  {
+    "id": 5,
+    "projectId": 2,
+    "name": "Task 2",
+    "description": "Implement a shopping cart functionality.",
+    "completed": true,
+    "priority": "Should Have",
+    "state": "Solved",
+    "time": "1.5  hours ",
+    "tags": ["shopping cart", "functionality"]
+  },
+  {
+    "id": 6,
+    "projectId": 2,
+    "name": "Task 3",
+    "description": "Integrate a secure payment gateway.",
+    "completed": false,
+    "priority": "Could Have",
+    "state": "InProgress",
+    "time": "2  hours",
+    "tags": ["payment gateway", "integration"]
+  },
+  {
+    "id": 7,
+    "projectId": 3,
+    "name": "Task 1",
+    "description": "Create a user-friendly task creation form.",
+    "completed": false,
+    "priority": "Must Have",
+    "state": "InProgress",
+    "time": "1.5  hours",
+    "tags": ["user-friendly", "form"]
+  },
+  {
+    "id": 8,
+    "projectId": 3,
+    "name": "Task 2",
+    "description": "Implement task categorization and prioritization.",
+    "completed": false,
+    "priority": "Should Have",
+    "state": "Waiting",
+    "time": "2  hours",
+    "tags": ["categorization", "prioritization"]
+  },
+  {
+    "id": 9,
+    "projectId": 3,
+    "name": "Task 3",
+    "description": "Develop a feature for marking tasks as completed.",
+    "completed": false,
+    "priority": "Could Have",
+    "state": "Solved",
+    "time": "1 hour",
+    "tags": ["feature", "completion"]
+  },
+  {
+    "id": 10,
+    "projectId": 4,
+    "name": "Task 1",
+    "description": "Connect to social media APIs for data retrieval.",
+    "completed": false,
+    "priority": "Must Have",
+    "state": "InProgress",
+    "time": "2  hours",
+    "tags": ["social media", "API", "data retrieval"]
+  },
+  {
+    "id": 11,
+    "projectId": 4,
+    "name": "Task 2",
+    "description": "Visualize engagement metrics using charts and graphs.",
+    "completed": false,
+    "priority": "Should Have",
+    "state": "Waiting",
+    "time": "1.5  hours",
+    "tags": ["visualization", "metrics", "charts"]
+  },
+  {
+    "id": 12,
+    "projectId": 4,
+    "name": "Task 3",
+    "description": "Implement user authentication for accessing personalized data.",
+    "completed": false,
+    "priority": "Could Have",
+    "state": "Solved",
+    "time": "1  hour",
+    "tags": ["user authentication", "personalized data"]
+  },
+  {
+    "id": 13,
+    "projectId": 5,
+    "name": "Task 1",
+    "description": "Design a user interface for entering workout details.",
+    "completed": false,
+    "priority": "Must Have",
+    "state": "Waiting",
+    "time": "2  hours",
+    "tags": ["design", "user interface", "workout"]
+  },
+  {
+    "id": 14,
+    "projectId": 5,
+    "name": "Task 2",
+    "description": "Implement a feature for tracking daily calorie intake.",
+    "completed": false,
+    "priority": "Should Have",
+    "state": "InProgress",
+    "time": "1.5  hours",
+    "tags": ["feature", "tracking", "calorie intake"]
+  },
+  {
+    "id": 15,
+    "projectId": 5,
+    "name": "Task 3",
+    "description": "Create visual representations of fitness achievements.",
+    "completed": false,
+    "priority": "Could Have",
+    "state": "Solved",
+    "time": "1  hour",
+    "tags": ["fitness", "achievement", "visualization"]
+  }
+]
