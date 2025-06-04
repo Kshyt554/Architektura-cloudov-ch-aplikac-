@@ -1,35 +1,42 @@
-const TaskList = require('../models/taskList.model');
+const TaskList = require('../models/taskList');
 
-// Create a new TaskList
-async function createTaskList(taskListData) {
-  const taskList = new TaskList(taskListData);
+async function createTaskList(data) {
+  const taskList = new TaskList({
+    name: data.name,
+    description: data.description,
+    solved: data.solved || false,  // если не передано — по умолчанию false
+  });
   return await taskList.save();
 }
 
-// Get TaskList by ID
-async function getTaskListById(taskListId) {
-  return await TaskList.findById(taskListId);
-}
-
-// Get All TaskLists
 async function getAllTaskLists() {
   return await TaskList.find();
 }
 
-// Update TaskList by ID
-async function updateTaskList(taskListId, updatedData) {
-  return await TaskList.findByIdAndUpdate(taskListId, updatedData, { new: true });
+async function getTaskListById(id) {
+  return await TaskList.findById(id);
 }
 
-// Delete TaskList by ID
-async function deleteTaskList(taskListId) {
-  return await TaskList.findByIdAndDelete(taskListId);
+async function updateTaskList(id, data) {
+  return await TaskList.findByIdAndUpdate(
+    id,
+    {
+      name: data.name,
+      description: data.description,
+      solved: data.solved,  // обновляем solved, если передано
+    },
+    { new: true }
+  );
+}
+
+async function deleteTaskList(id) {
+  return await TaskList.findByIdAndDelete(id);
 }
 
 module.exports = {
   createTaskList,
-  getTaskListById,
   getAllTaskLists,
+  getTaskListById,
   updateTaskList,
   deleteTaskList,
 };

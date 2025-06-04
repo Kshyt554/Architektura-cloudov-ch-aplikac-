@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Modal } from "react-bootstrap";
 
-const EditTaskForm = ({ show, handleClose, handleEditTask }) => {
+const EditTaskForm = ({ show, handleClose, handleEditTask, task }) => {
   const [editTaskName, setEditTaskName] = useState("");
   const [editTaskDescription, setEditTaskDescription] = useState("");
   const [editTaskPriority, setEditTaskPriority] = useState("must-have");
@@ -9,14 +9,27 @@ const EditTaskForm = ({ show, handleClose, handleEditTask }) => {
   const [editTaskTime, setEditTaskTime] = useState(""); 
   const [editTaskTags, setEditTaskTags] = useState(""); 
 
+  // Обновление состояния при открытии модального окна и передаче задачи
+  useEffect(() => {
+    if (task) {
+      setEditTaskName(task.name || "");
+      setEditTaskDescription(task.description || "");
+      setEditTaskPriority(task.priority || "must-have");
+      setEditTaskState(task.state || "in-progress");
+      setEditTaskTime(task.time || "");
+      setEditTaskTags(task.tags || "");
+    }
+  }, [task]);
+
   const handleEditClick = () => {
     handleEditTask({
+      id: task.id, // <-- важно для API запроса PUT
       name: editTaskName,
       description: editTaskDescription,
       priority: editTaskPriority,
       state: editTaskState,
-      time: editTaskTime, 
-      tags: editTaskTags, 
+      time: editTaskTime,
+      tags: editTaskTags,
     });
   };
 
@@ -93,7 +106,7 @@ const EditTaskForm = ({ show, handleClose, handleEditTask }) => {
           Cancel
         </Button>
         <Button variant="primary" onClick={handleEditClick}>
-          Edit Task
+          Save Changes
         </Button>
       </Modal.Footer>
     </Modal>

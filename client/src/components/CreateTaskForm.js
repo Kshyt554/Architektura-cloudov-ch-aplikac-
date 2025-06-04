@@ -1,23 +1,39 @@
 import React, { useState } from "react";
 import { Form, Button, Modal } from "react-bootstrap";
 
-const CreateTaskForm = ({ show, handleClose, handleCreateTask }) => {
+const CreateTaskForm = ({ show, handleClose, handleCreateTask, projectId }) => {
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState("must-have");
   const [newTaskState, setNewTaskState] = useState("in-progress");
-  const [newTaskTime, setNewTaskTime] = useState(""); 
-  const [newTaskTags, setNewTaskTags] = useState(""); 
+  const [newTaskTime, setNewTaskTime] = useState("");
+  const [newTaskTags, setNewTaskTags] = useState("");
 
-  const handleCreateClick = () => {
-    handleCreateTask({
+  const handleCreateClick = async () => {
+    if (!newTaskName.trim()) {
+      alert("Task name is required!");
+      return;
+    }
+
+    await handleCreateTask({
+      projectId,
       name: newTaskName,
       description: newTaskDescription,
       priority: newTaskPriority,
       state: newTaskState,
-      time: newTaskTime, 
-      tags: newTaskTags, 
+      time: newTaskTime,
+      tags: newTaskTags,
     });
+
+    // Очистка формы
+    setNewTaskName("");
+    setNewTaskDescription("");
+    setNewTaskPriority("must-have");
+    setNewTaskState("in-progress");
+    setNewTaskTime("");
+    setNewTaskTags("");
+
+    handleClose();
   };
 
   return (
@@ -44,11 +60,9 @@ const CreateTaskForm = ({ show, handleClose, handleCreateTask }) => {
               onChange={(e) => setNewTaskDescription(e.target.value)}
             />
           </Form.Group>
-          
           <Form.Group className="mb-3" controlId="newTaskPriority">
             <Form.Label>Task Priority</Form.Label>
-            <Form.Control
-              as="select"
+            <Form.Select
               value={newTaskPriority}
               onChange={(e) => setNewTaskPriority(e.target.value)}
             >
@@ -56,19 +70,18 @@ const CreateTaskForm = ({ show, handleClose, handleCreateTask }) => {
               <option value="should-have">Should Have</option>
               <option value="could-have">Could Have</option>
               <option value="dont-have">Don't Have</option>
-            </Form.Control>
+            </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3" controlId="newTaskState">
             <Form.Label>Task State</Form.Label>
-            <Form.Control
-              as="select"
+            <Form.Select
               value={newTaskState}
               onChange={(e) => setNewTaskState(e.target.value)}
             >
               <option value="in-progress">In Progress</option>
               <option value="solved">Solved</option>
               <option value="waiting">Waiting</option>
-            </Form.Control>
+            </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3" controlId="newTaskTime">
             <Form.Label>Time (hours)</Form.Label>

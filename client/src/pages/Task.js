@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Button, ListGroup, Form, Dropdown, DropdownButton, ButtonGroup } from "react-bootstrap";
-import { useParams, Link } from "react-router-dom";
-import Projects from '../project_data.json';
-import Tasks from '../task_data.json';
+import { useParams } from "react-router-dom";
 import CreateTaskForm from '../components/CreateTaskForm';
 import TaskDetail from '../components/TaskDetail';
 import EditTaskForm from "../components/EditTaskForm";
 import CommentForm from  '../components/Comment';
 
 const TaskPage = () => {
-  const { projectId } = useParams();
-  const selectedProject = Projects.find((project) => project.id === projectId && project !== null);
+  const { projectId } = useParams(); // projectId — строка ObjectId из URL
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -19,25 +19,78 @@ const TaskPage = () => {
   const [tasks, setTasks] = useState([]);
   const [selectedState, setSelectedState] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
 
+  // Загрузка проектов при монтировании
   useEffect(() => {
-    // Simulate fetching tasks data
-    setTimeout(() => {
-      if (projectId) {
-        // Fetch tasks for a specific project
-        setTasks(Tasks.filter((task) => task.projectId === Number(projectId)));
-      } else {
-        // Fetch all tasks
-        setTasks(Tasks);
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects');
+        if (!response.ok) {
+          const errorText = await response.text();  // Получаем тело ошибки для диагностики
+      console.error(`Ошибка загрузки задач, статус: ${response.status}`, errorText);
+          throw new Error('Ошибка при загрузке проектов');
+        }
+        const data = await response.json();
+        setProjects(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
       }
-      setLoading(false);
-    }, 1000); 
+    };
+    fetchProjects();
+  }, []);
+
+  // Загрузка задач при изменении projectId
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+      try {
+        const url = projectId ? `/api/tasks/project/${projectId}` : `/api/tasks`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Ошибка при загрузке задач');
+        }
+        const data = await response.json();
+        console.log("Задачи из API:", data); // Лог для отладки
+        const tasksWithId = data.map(task => ({ ...task, id: task._id }));
+        setTasks(tasksWithId);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTasks();
   }, [projectId]);
 
-  const handleCreateTask = (newTask) => {
-    setTasks([...tasks, newTask]);
-    setShowCreateModal(false);
+  // Обновляем selectedProject при изменении projects или projectId
+  useEffect(() => {
+    if (projects.length > 0 && projectId) {
+      const proj = projects.find(p => p._id === projectId);
+      setSelectedProject(proj || null);
+    }
+  }, [projects, projectId]);
+
+  const handleCreateTask = async (newTask) => {
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newTask, projectId }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        console.error('Server error details:', errData);
+        throw new Error(errData.message || 'Error creating task');
+      }
+      const createdTask = await response.json();
+      setTasks([...tasks, { ...createdTask, id: createdTask._id }]);
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      alert(`Ошибка создания задачи: ${error.message}`);
+    }
   };
 
   const handleTaskDetail = (task) => {
@@ -50,21 +103,33 @@ const TaskPage = () => {
     setSelectedTask(null);
   };
 
-  const handleDeleteTask = (taskId) => {
-    const updatedTasks = tasks.filter((task) => task.id !== taskId);
-    setTasks(updatedTasks);
-    // Close the detail modal if the deleted task was open
-    setSelectedTask(null);
-    setShowTaskDetail(false);
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+      setTasks(tasks.filter((task) => task.id !== taskId));
+      setSelectedTask(null);
+      setShowTaskDetail(false);
+    } catch (error) {
+     console.error("Error deleting task:", error);
+    alert(`Ошибка удаления задачи: ${error.message}`);
+    }
   };
 
-  const handleEditTask = (editTask) => {
-    const updatedTasks = tasks.map((task) =>
-    task.id === editTask.id ? { ...task, ...editTask } : task
-  );
-  setTasks(updatedTasks);
-    setShowEditModal(false);
-    setSelectedTask(null);
+  const handleEditTask = async (editTask) => {
+    try {
+      const response = await fetch(`/api/tasks/${editTask.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editTask),
+      });
+
+      const updated = await response.json();
+      setTasks(tasks.map((task) => (task.id === updated._id ? { ...updated, id: updated._id } : task)));
+      setShowEditModal(false);
+      setSelectedTask(null);
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
   const handleUpdateTask = (updatedTask) => {
@@ -75,15 +140,14 @@ const TaskPage = () => {
     setShowCreateModal(false);
     setSelectedTask(null);
   };
+   const filteredTasks = tasks.filter((task) => {
+     const stateFilter = selectedState === 'all' || task.state === selectedState;
+     const priorityFilter = selectedPriority === 'all' || task.priority === selectedPriority;
+     return stateFilter && priorityFilter;
+   });
 
-  const filteredTasks = tasks.filter((task) => {
-    const stateFilter = selectedState === 'all' || task.state === selectedState;
-    const priorityFilter = selectedPriority === 'all' || task.priority === selectedPriority;
-    return stateFilter && priorityFilter;
-  });
-
-  const stateOptions = ['Waiting', 'InProgress', 'Solved','all'];
-  const priorityOptions = ['Must Have', 'Should Have', 'Could Have','Dont Have','all'];
+  const stateOptions = ['waiting', 'in-progress', 'solved', 'all'];
+  const priorityOptions = ['must-have', 'should-have', 'could-have', 'dont-have', 'all'];
 
   return (
     <div style={{ padding: '20px', maxWidth: '1450px', margin: 'auto' }}>
@@ -108,7 +172,7 @@ const TaskPage = () => {
                 title={`State: ${selectedState}`}
                 id="state-dropdown"
                 onSelect={(state) => setSelectedState(state)}
-                style={{ fontSize: "1.1rem", minWidth: "150px", marginBottom: "0px", }}
+                style={{ fontSize: "1.1rem", minWidth: "150px", marginBottom: "0px" }}
               >
                 {stateOptions.map((state) => (
                   <Dropdown.Item key={state} eventKey={state}>
@@ -123,12 +187,12 @@ const TaskPage = () => {
                 onSelect={(priority) => setSelectedPriority(priority)}
                 style={{ fontSize: "1.1rem", marginBottom: "40px" }}
               >
-                <Dropdown.Toggle variant="primary"  style={{ padding: "14px 22px" }}>
+                <Dropdown.Toggle variant="primary" style={{ padding: "14px 22px" }}>
                   {`Priority: ${selectedPriority}`}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   {priorityOptions.map((priority) => (
-                    <Dropdown.Item key={priority} eventKey={priority}> 
+                    <Dropdown.Item key={priority} eventKey={priority}>
                       {priority}
                     </Dropdown.Item>
                   ))}
@@ -139,41 +203,51 @@ const TaskPage = () => {
 
           <h3>Tasks</h3>
           <Button
-      
-            style={{ fontSize: "1.1rem", marginLeft: "1300px", marginTop:"-100px" }}
-            class="btn btn-primary btn-lg"
+            style={{ fontSize: "1.1rem", marginLeft: "1300px", marginTop: "-100px" }}
+            className="btn btn-primary btn-lg"
             onClick={() => setShowCreateModal(true)}
           >
             Create Task
           </Button>
           <ListGroup>
             {filteredTasks.map((task) => (
-              <ListGroup.Item key={task.id} style={{fontSize:"1.2rem", borderWidth:"2.5px"}}>
-                {task.name } 
+              <ListGroup.Item key={task.id} style={{ fontSize: "1.2rem", borderWidth: "2.5px" }}>
+                {task.name}
                 <div>
                   <p>Description: {task.description}</p>
-                  </div> 
-                  <div class="text-primary">
-                   <p>Priority: {task.priority}</p>
-                    </div> 
-                    <div class="text-warning">
-                     <p>State: {task.state}</p> 
-                      </div>
-                <div class="float-right">
-                <Button variant="primary" style={{ fontSize: "1.1rem", padding: "5px 12px" }} class="btn btn-info"  onClick={() => handleTaskDetail(task)}>
-                  Details
-                </Button>{" "}
-                <Button variant="danger" style={{ fontSize: "1.1rem", padding: "5px 12px" }} onClick={() => handleDeleteTask(task.id)}>
-                  Delete
-                </Button>{" "}
-                <Button variant="warning" style={{ fontSize: "1.1rem", padding: "5px 12px" }} onClick={() => setShowEditModal(true)}>
-                  Edit
-                </Button>
-               
-                <Button variant="info" style={{ fontSize: "1.1rem", padding: "5px 12px", marginLeft: "5px" }} onClick={() => setShowCommentModal(true)}>
-                  Comment
-                </Button>
-              
+                </div>
+                <div className="text-primary">
+                  <p>Priority: {task.priority}</p>
+                </div>
+                <div className="text-warning">
+                  <p>State: {task.state}</p>
+                </div>
+                <div className="float-right">
+                  <Button
+                    variant="primary"
+                    style={{ fontSize: "1.1rem", padding: "5px 12px" }}
+                    className="btn btn-info"
+                    onClick={() => handleTaskDetail(task)}
+                  >
+                    Details
+                  </Button>{" "}
+                  <Button
+                    variant="danger"
+                    style={{ fontSize: "1.1rem", padding: "5px 12px" }}
+                    onClick={() => handleDeleteTask(task.id)}
+                  >
+                    Delete
+                  </Button>{" "}
+                  <Button
+                    variant="warning"
+                    style={{ fontSize: "1.1rem", padding: "5px 12px" }}
+                    onClick={() => {
+                      setSelectedTask(task);
+                      setShowEditModal(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
                 </div>
               </ListGroup.Item>
             ))}
@@ -188,25 +262,26 @@ const TaskPage = () => {
             handleCreateTask={handleCreateTask}
             handleUpdateTask={handleUpdateTask}
             task={selectedTask}
+            projectId={projectId}
           />
 
           <CommentForm
-           show={showCommentModal}
-           handleClose={() => {
-            setShowCommentModal(false);
-            setSelectedTask(null);
-          }}
+            show={showCommentModal}
+            handleClose={() => {
+              setShowCommentModal(false);
+              setSelectedTask(null);
+            }}
           />
 
           <EditTaskForm
-         show={showEditModal}
-         handleClose={() => {
-           setShowEditModal(false);
-           setSelectedTask(null);
-         }}
-         handleEditTask={handleEditTask}
-         handleUpdateTask={handleUpdateTask}
-         task={selectedTask}
+            show={showEditModal}
+            handleClose={() => {
+              setShowEditModal(false);
+              setSelectedTask(null);
+            }}
+            handleEditTask={handleEditTask}
+            handleUpdateTask={handleUpdateTask}
+            task={selectedTask}
           />
           {selectedTask && (
             <TaskDetail

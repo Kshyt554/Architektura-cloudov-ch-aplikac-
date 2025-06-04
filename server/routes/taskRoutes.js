@@ -1,74 +1,109 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
-// Импорт модели Task
 const Task = require('../models/task');
+const TaskList = require('../models/taskList');
 
-// Получить все задачи
-router.get('/', async (req, res) => {
-  try {
-    const tasks = await Task.find(); // Ищем все задачи в базе данных
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ message: 'Ошибка при получении задач', error: err });
-  }
-});
-
-// Создать новую задачу
+// Создание новой задачи с валидацией projectId
 router.post('/', async (req, res) => {
-  const { title, description, completed, taskListId } = req.body;
+  const {
+    name,
+    description,
+    completed,
+    projectId,
+    priority,
+    state,
+    time,
+    tags
+  } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    return res.status(400).json({ message: 'Неверный формат projectId' });
+  }
+
+  const taskListExists = await TaskList.findById(projectId);
+  if (!taskListExists) {
+    return res.status(404).json({ message: 'TaskList с таким projectId не найден' });
+  }
 
   try {
     const newTask = new Task({
-      title,
+      name,
       description,
       completed,
-      taskListId,
+      projectId,
+      priority,
+      state,
+      time,
+      tags
     });
 
     const savedTask = await newTask.save();
     res.status(201).json(savedTask);
   } catch (err) {
-    res.status(400).json({ message: 'Ошибка при создании задачи', error: err });
+    console.error('Error saving task:', err);
+    res.status(400).json({ message: 'Ошибка при создании задачи', error: err.message });
   }
 });
 
-// Получить задачу по ID
-router.get('/:id', async (req, res) => {
+// Получить все задачи по projectId
+router.get('/project/:projectId', async (req, res) => {
+  const { projectId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    return res.status(400).json({ message: 'Неверный формат projectId' });
+  }
+
   try {
-    const task = await Task.findById(req.params.id);
-    if (!task) {
-      return res.status(404).json({ message: 'Задача не найдена' });
-    }
-    res.json(task);
+    const tasks = await Task.find({ projectId });
+    res.json(tasks);
   } catch (err) {
-    res.status(500).json({ message: 'Ошибка при получении задачи', error: err });
+    console.error('Ошибка при загрузке задач:', err);
+    res.status(500).json({ message: 'Ошибка при загрузке задач' });
   }
 });
 
-// Обновить задачу по ID
+// Обновить задачу по taskId
 router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Неверный формат taskId' });
+  }
+
   try {
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedTask = await Task.findByIdAndUpdate(id, req.body, { new: true });
+
     if (!updatedTask) {
       return res.status(404).json({ message: 'Задача не найдена' });
     }
-    res.json(updatedTask);
+
+    res.status(200).json(updatedTask);
   } catch (err) {
-    res.status(400).json({ message: 'Ошибка при обновлении задачи', error: err });
+    console.error('Ошибка при обновлении задачи:', err);
+    res.status(500).json({ message: 'Ошибка при обновлении задачи' });
   }
 });
 
-// Удалить задачу по ID
 router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Неверный формат taskId' });
+  }
+
   try {
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+    const deletedTask = await Task.findByIdAndDelete(id);
+
     if (!deletedTask) {
       return res.status(404).json({ message: 'Задача не найдена' });
     }
-    res.json({ message: 'Задача удалена' });
+
+    res.status(200).json({ message: 'Задача успешно удалена' });
   } catch (err) {
-    res.status(500).json({ message: 'Ошибка при удалении задачи', error: err });
+    console.error('Ошибка при удалении задачи:', err);
+    res.status(500).json({ message: 'Ошибка сервера при удалении задачи' });
   }
 });
 

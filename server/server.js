@@ -27,9 +27,9 @@ app.use('/api/tasklists', taskListRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.send('🎉 Task Manager API is running');
+  res.send('Task Manager API is running');
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  console.log(` Server is running on http://localhost:${PORT}`);
 });
